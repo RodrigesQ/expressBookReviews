@@ -16,7 +16,7 @@ app.use("/customer",session({secret:"fingerprint_auth",resave: true, saveUniniti
 
 });
  
-const PORT =5001;
+const PORT =5000;
 
 app.use("/customer", customer_routes);
 app.use("/", genl_routes);
