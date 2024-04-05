@@ -1,8 +1,11 @@
+//general.js
+
 const express = require('express');
 let books = require("./booksdb.js");
 let isValid = require("./auth_users.js").isValid;
-let users = require("./auth_users.js").users;
+//let users = require("./auth_users.js").users;
 const public_users = express.Router();
+const { addUser } = require("./usersdb.js"); // Import addUser function from usersdb.js
 
 
 public_users.post("/register", (req, res) => {
@@ -21,7 +24,10 @@ public_users.post("/register", (req, res) => {
     }
 
     // If username doesn't exist, add the new user to the users array
-    users.push({ username, password });
+    //users.push({ username, password });
+    addUser(username, password);
+
+    // Respond with success message
     return res.status(201).json({ message: "User registered successfully" });
 });
 
