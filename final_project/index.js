@@ -15,6 +15,7 @@ app.use("/customer/auth/*", function auth(req,res,next){
 app.use("/customer",session({secret:"fingerprint_auth",resave: true, saveUninitialized: true}))
 
 });
+
  
 const PORT =5000;
 
