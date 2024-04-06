@@ -74,39 +74,46 @@ regd_users.put("/auth/review/:isbn", (req, res) => {
     console.log("Books:", books, "Data type:", typeof books);
 
     // Find the book with the matching ISBN
+    let foundBook = null;
     for (const key in books) {
-        if (books.hasOwnProperty(key)) { // Check for own properties
+        if (books.hasOwnProperty(key)) {
             const bookObject = books[key];
 
-            // Print requested ISBN for debugging
-            console.log("Requested bookObject:", bookObject);
+            // Print requested bookObject for debugging
+            console.log("Requested bookObject:", bookObject, typeof bookObject);
 
-            if (bookObject && bookObject.isbn === isbn) {
-                // Book found! Save the book object for further actions
-                const foundBook = bookObject;
+            if (bookObject.isbn === isbn) {
+                // Book found! Save the book object
+                foundBook = bookObject;
                 break; // Exit the loop once the book is found
             }
         }
+    }
 
-        if (foundBook) {
-            // Book found! Proceed with review logic
+    // Print requested bookObject for debugging
+    console.log("Book found!", foundBook, typeof foundBook);
 
-            // Find the review for the given ISBN and username
-            const userReview = bookObject.reviews.find((reviewObj) => reviewObj.username === username);
+    if (foundBook) {
+        // Book found! Proceed with review logic
 
-            if (userReview) {
-                // If a review exists for the user and ISBN, modify the existing review
-                userReview.review = review;
-                return res.status(200).json({ message: "Review modified successfully" });
-            } else {
-                // If no review exists for the user and ISBN, add a new review
-                bookObject.reviews.push({ review, username });
-                return res.status(201).json({ message: "Review added successfully" });
-            }
+        /// Find the existing review for the given username
+        const existingReviewKey = Object.keys(foundBook.reviews).find(
+            key => foundBook.reviews[key].username === username
+        );
+
+        if (existingReviewKey) {
+            // If a review exists for the user and ISBN, modify the existing review
+            foundBook.reviews[existingReviewKey].review = review;
+            return res.status(200).json({ message: "Review modified successfully" });
         } else {
-            // Book not found!
-            return res.status(404).json({ message: "Book not found" });
+            // If no review exists for the user and ISBN, add a new review
+            const newReviewKey = Object.keys(foundBook.reviews).length + 1; // Generate a new key for the review
+            foundBook.reviews[newReviewKey] = { review, username };
+            return res.status(201).json({ message: "Review added successfully" });
         }
+    } else {
+        // Book not found!
+        return res.status(404).json({ message: "Book not found" });
     }
 });
 
