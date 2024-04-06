@@ -5,7 +5,7 @@ const jwt = require('jsonwebtoken');
 const regd_users = express.Router();
 const { users } = require("./usersdb.js"); // Import users array and addUser function from usersdb.js
 const books = require("./booksdb.js"); // Import books array from booksdb.js
-
+const axios = require('axios');
 
 const isValid = (username) => { //returns boolean
     //write code to check is the username is valid
@@ -146,45 +146,97 @@ regd_users.delete("/auth/review/:isbn", (req, res) => {
 
     // Find the existing review for the given username
     //const existingReviewKey = Object.keys(foundBook.reviews).find(
-     //   key => foundBook.reviews[key].username === username
+    //   key => foundBook.reviews[key].username === username
     //);
 
-let existingReview = null; // Initialize to null
+    let existingReview = null; // Initialize to null
 
-// Check if the book and its reviews exist
-if (foundBook && foundBook.reviews) {
-  // Iterate through each review within the foundBook.reviews object
-  for (const key in foundBook.reviews) {
-    const reviewObject = foundBook.reviews[key];
+    // Check if the book and its reviews exist
+    if (foundBook && foundBook.reviews) {
+        // Iterate through each review within the foundBook.reviews object
+        for (const key in foundBook.reviews) {
+            const reviewObject = foundBook.reviews[key];
 
-    // If the username of the current review matches the given username
-    if (reviewObject.username === username) {
-      // Assign the found review to existingReview
-      existingReview = reviewObject;
+            // If the username of the current review matches the given username
+            if (reviewObject.username === username) {
+                // Assign the found review to existingReview
+                existingReview = reviewObject;
 
-      // Break out of the loop, as we've found the matching review
-      break;
+                // Break out of the loop, as we've found the matching review
+                break;
+            }
+        }
     }
-  }
-}
 
-// Print the existingReview for debugging
-console.log("existingReview found!", existingReview, typeof existingReview);
+    // Print the existingReview for debugging
+    console.log("existingReview found!", existingReview, typeof existingReview);
 
 
     // Delete the found review
-if (existingReview) {
-    delete foundBook.reviews[existingReview.username]; // Assuming username is the key for reviews
-  
-    // If your data store requires explicit updates:
-    // await updateBookReviews(foundBook._id, foundBook.reviews);
-  
-    return res.status(200).json({ message: "Review deleted successfully" });
-  } else {
-    return res.status(404).json({ message: "No reviews found for this user" });
-  }
+    if (existingReview) {
+        delete foundBook.reviews[existingReview.username]; // Assuming username is the key for reviews
+
+        // If your data store requires explicit updates:
+        // await updateBookReviews(foundBook._id, foundBook.reviews);
+
+        return res.status(200).json({ message: "Review deleted successfully" });
+    } else {
+        return res.status(404).json({ message: "No reviews found for this user" });
+    }
 });
 
+// Get the book list available in the shop
+regd_users.get('/auth/', async (req, res) => {
+    try {
+        res.status(200).json(books);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Failed to retrieve books' });
+    }
+});
+
+// Get book details based on ISBN
+regd_users.get('/auth/isbn/:isbn', function (req, res) {
+    //Write your code here
+    const isbn = req.params.isbn; // Retrieve the ISBN from the request parameters
+    // Find the book with the matching ISBN
+    const book = Object.values(books).find(book => book.isbn === isbn);
+    if (book) {
+        // If the book is found, send its details in the response
+        return res.status(200).json(book);
+    } else {
+        // If the book is not found, send a 404 Not Found response
+        return res.status(404).json({ error: 'Book not found' });
+    }
+});
+
+// Get book details based on author
+regd_users.get('/auth/author/:author', function (req, res) {
+    //Write your code here
+    const author = req.params.author;
+    const book = Object.values(books).find(book => book.author === author);
+    if (book) {
+        // If the book is found, send its details in the response
+        return res.status(200).json(book);
+    } else {
+        // If the book is not found, send a 404 Not Found response
+        return res.status(404).json({ error: 'Book not found' });
+    }
+});
+
+// Get all books based on title
+regd_users.get('/auth/title/:title', function (req, res) {
+    //Write your code here
+    const title = req.params.title;
+    const book = Object.values(books).find(book => book.title === title);
+    if (book) {
+        // If the book is found, send its details in the response
+        return res.status(200).json(book);
+    } else {
+        // If the book is not found, send a 404 Not Found response
+        return res.status(404).json({ error: 'Book not found' });
+    }
+});
 
 
 

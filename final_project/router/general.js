@@ -6,6 +6,8 @@ let isValid = require("./auth_users.js").isValid;
 //let users = require("./auth_users.js").users;
 const public_users = express.Router();
 const { addUser } = require("./usersdb.js"); // Import addUser function from usersdb.js
+const axios = require('axios'); // Assuming Axios is installed
+
 
 
 public_users.post("/register", (req, res) => {
@@ -95,5 +97,8 @@ public_users.get('/review/:isbn', function (req, res) {
 
     return res.status(200).json(reviews);
 });
+
+
+
 
 module.exports.general = public_users;
