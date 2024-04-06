@@ -117,6 +117,74 @@ regd_users.put("/auth/review/:isbn", (req, res) => {
     }
 });
 
+//Deleting a book review
+regd_users.delete("/auth/review/:isbn", (req, res) => {
+    // Extract username and ISBN from request
+    const username = req.session.authorization.username;
+    const isbn = req.params.isbn;
+
+    // Find the book with the matching ISBN
+    let foundBook = null;
+    for (const key in books) {
+        if (books.hasOwnProperty(key)) {
+            const bookObject = books[key];
+            if (bookObject.isbn === isbn) {
+                // Book found! Save the book object
+                foundBook = bookObject;
+                break; // Exit the loop once the book is found
+            }
+        }
+    }
+
+    // Print requested bookObject for debugging
+    console.log("Book found!", foundBook, typeof foundBook);
+
+    if (!foundBook) {
+        // Book not found
+        return res.status(404).json({ message: "Book not found" });
+    }
+
+    // Find the existing review for the given username
+    //const existingReviewKey = Object.keys(foundBook.reviews).find(
+     //   key => foundBook.reviews[key].username === username
+    //);
+
+let existingReview = null; // Initialize to null
+
+// Check if the book and its reviews exist
+if (foundBook && foundBook.reviews) {
+  // Iterate through each review within the foundBook.reviews object
+  for (const key in foundBook.reviews) {
+    const reviewObject = foundBook.reviews[key];
+
+    // If the username of the current review matches the given username
+    if (reviewObject.username === username) {
+      // Assign the found review to existingReview
+      existingReview = reviewObject;
+
+      // Break out of the loop, as we've found the matching review
+      break;
+    }
+  }
+}
+
+// Print the existingReview for debugging
+console.log("existingReview found!", existingReview, typeof existingReview);
+
+
+    // Delete the found review
+if (existingReview) {
+    delete foundBook.reviews[existingReview.username]; // Assuming username is the key for reviews
+  
+    // If your data store requires explicit updates:
+    // await updateBookReviews(foundBook._id, foundBook.reviews);
+  
+    return res.status(200).json({ message: "Review deleted successfully" });
+  } else {
+    return res.status(404).json({ message: "No reviews found for this user" });
+  }
+});
+
 
 
 
